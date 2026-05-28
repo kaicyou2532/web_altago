@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Noto_Sans_JP } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 
@@ -11,6 +11,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+});
+
+const notoSansJP = Noto_Sans_JP({
+  variable: '--font-noto-sans-jp',
+  subsets: ['latin'],
+  weight: ['400', '500', '700', '900'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -27,9 +34,9 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${notoSansJP.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-gray-50 text-gray-900">
+      <body className="min-h-full flex flex-col bg-gray-50 text-gray-900" style={{ fontFamily: 'var(--font-noto-sans-jp), var(--font-geist-sans), sans-serif' }}>
         <Navbar />
         <main className="flex-1">{children}</main>
         <footer className="border-t border-gray-200 bg-white py-8 mt-auto">
