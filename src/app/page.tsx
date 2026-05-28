@@ -270,7 +270,7 @@ export default function HomePage() {
             現地で、あなたが困ったら
           </h2>
           <p className="text-black/40 text-sm leading-relaxed mb-10 max-w-lg mx-auto animate-on-scroll delay-200">
-            旅先でのトラブル・緊急事態には、現地サポートの専門サービスも併用できます。
+            旅先でのトラブル・緊急事態には、先人たちの知恵を利用しよう。
             altago の Runner ネットワークと連携し、あなたを全力でサポートします。
           </p>
           <a
