@@ -19,7 +19,6 @@ const slides = [
   { id: 'acquisition', component: SlideAcquisition },
   { id: 'revenue', component: SlideRevenue },
   { id: 'summary', component: SlideSummary },
-  { id: 'traubling', component: SlideTraubling },
 ];
 
 /* ────────────────────────────────────────────
@@ -387,47 +386,6 @@ function SlideSummary() {
             </div>
           ))}
         </div>
-      </div>
-      <div className="px-16 py-6 flex justify-between text-xs text-gray-600">
-        <span>altago</span>
-        <span>Confidential — 2026年5月</span>
-      </div>
-    </div>
-  );
-}
-
-/* ────────────────────────────────────────────
-   スライド 10: Traubling
-──────────────────────────────────────────── */
-function SlideTraubling() {
-  return (
-    <div className="w-full h-full flex flex-col" style={{ backgroundColor: '#0a0a0a' }}>
-      <div className="h-1.5 w-full" style={{ backgroundColor: BRAND }} />
-      <div className="flex-1 flex flex-col items-center justify-center px-16 text-center gap-8">
-        <p className="text-xs font-semibold tracking-[0.3em]" style={{ color: BRAND }}>
-          POWERED BY PARTNER
-        </p>
-        <div>
-          <p className="text-3xl font-black text-white mb-3 leading-snug">
-            現地で、あなたが困ったら
-          </p>
-          <p className="text-gray-400 text-sm max-w-lg leading-relaxed">
-            旅先でのトラブル・緊急事態には、現地サポートの専門サービスも活用できます。
-            altago の Runner ネットワークと連携し、あなたを全力でサポートします。
-          </p>
-        </div>
-        <a
-          href="https://traubling.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex items-center gap-3 px-8 py-4 rounded-2xl border-2 text-white font-bold text-lg transition-all hover:scale-105"
-          style={{ borderColor: BRAND, backgroundColor: 'rgba(0,123,99,0.15)' }}
-        >
-          <span>traubling.com</span>
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </a>
       </div>
       <div className="px-16 py-6 flex justify-between text-xs text-gray-600">
         <span>altago</span>

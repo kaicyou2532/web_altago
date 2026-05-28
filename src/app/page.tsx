@@ -262,6 +262,32 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Traubling Partnership */}
+      <section className="bg-white py-20 border-t border-gray-100">
+        <div className="mx-auto max-w-3xl px-4 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] mb-4 text-gray-400">PARTNER</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-950 mb-4 leading-tight">
+            現地で、あなたが困ったら
+          </h2>
+          <p className="text-gray-500 text-sm leading-relaxed mb-8 max-w-lg mx-auto">
+            旅先でのトラブル・緊急事態には、現地サポートの専門サービスも併用できます。<br />
+            altago の Runner ネットワークと連携し、あなたを全力でサポートします。
+          </p>
+          <a
+            href="https://traubling.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border font-semibold px-8 py-3.5 text-sm transition-colors hover:bg-gray-50"
+            style={{ borderColor: '#007B63', color: '#007B63' }}
+          >
+            traubling.com
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
+      </section>
     </div>
   );
 }
