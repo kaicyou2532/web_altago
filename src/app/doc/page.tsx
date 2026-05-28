@@ -8,7 +8,7 @@ export default function DocPage() {
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
           <iframe
-            src="https://docs.google.com/document/d/1vc8dVX4NnMhrBUBq1udKzgpGkyWtbGgFTS2Irqx6oPM/pub?embedded=true"
+            src="https://docs.google.com/document/d/1vc8dVX4NnMhrBUBq1udKzgpGkyWtbGgFTS2Irqx6oPM/preview"
             className="w-full"
             style={{ height: 'calc(100vh - 180px)', minHeight: '600px', border: 'none' }}
             title="altago 企画ドキュメント"
