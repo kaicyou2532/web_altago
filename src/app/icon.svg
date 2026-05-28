@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- 背景：指定色の角丸四角形 -->
+  <rect width="32" height="32" rx="7" fill="#007B63"/>
+  
+  <!-- 中央のグラフィック（"A" を抽象化したシャープなデザイン） -->
+  <path d="M16 6L24 22H20L16 14L12 22H8L16 6Z" fill="#FFFFFF"/>
+  
+  <!-- アクセント：物理的な地点・接点を表す中心の白いノードドット -->
+  <circle cx="16" cy="18" r="2" fill="#FFFFFF"/>
+</svg>

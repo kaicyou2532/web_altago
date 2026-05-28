@@ -262,7 +262,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
+/Users/nakamurakiichi/Downloads/gemini-svg.svg
       {/* Traubling Partnership */}
       <section className="bg-white py-20 border-t border-gray-100">
         <div className="mx-auto max-w-3xl px-4 text-center">
