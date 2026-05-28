@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
@@ -19,7 +20,8 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/95 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-8">
         {/* Logo */}
-        <Link href="/" className="font-bold text-xl tracking-tight text-gray-900 hover:opacity-70 transition-opacity">
+        <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight text-gray-900 hover:opacity-70 transition-opacity">
+          <Image src="/icon.svg" alt="altago" width={28} height={28} />
           altago
         </Link>
 
