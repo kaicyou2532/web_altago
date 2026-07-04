@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ShoppingBag, FileText, Gift, MapPin, Star, Zap, CheckCircle2 } from 'lucide-react';
-import { mockTasks } from '@/lib/mockData';
+import { getTasks } from '@/lib/api/tasks';
+import { Task } from '@/types';
 
 /* スクロールアニメーション用フック */
 function useScrollAnimation() {
@@ -59,8 +60,14 @@ const features = [
 ];
 
 export default function HomePage() {
-  const demoTasks = mockTasks.slice(0, 3);
+  const [liveTasks, setLiveTasks] = useState<Task[]>([]);
   const pageRef = useScrollAnimation();
+
+  useEffect(() => {
+    getTasks({ status: 'OPEN' })
+      .then((tasks) => setLiveTasks(tasks.slice(0, 6)))
+      .catch(() => setLiveTasks([]));
+  }, []);
 
 
   const steps = [
@@ -116,7 +123,7 @@ export default function HomePage() {
             <div className="animate-on-scroll-scale delay-200 relative hidden lg:flex items-center justify-center">
               <div className="absolute inset-0 rounded-2xl bg-[#F6F6F6]" />
               <div className="relative w-full max-w-sm p-8 space-y-4">
-                {demoTasks.slice(0, 3).map((task, i) => {
+                {liveTasks.slice(0, 3).map((task, i) => {
                   const status = statusLabel[task.status];
                   return (
                     <div
@@ -215,7 +222,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {demoTasks.map((task, i) => {
+            {liveTasks.map((task, i) => {
               const status = statusLabel[task.status];
               return (
                 <div key={task.id} className={`border border-black/5 rounded-xl p-6 hover:border-black/20 hover:shadow-sm transition-all animate-on-scroll delay-${(i % 5 + 1) * 100}`}>

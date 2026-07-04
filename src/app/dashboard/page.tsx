@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Task, TaskStatus } from '@/types';
-import { mockTasks } from '@/lib/mockData';
+import { getMyTasks, createTask } from '@/lib/api/tasks';
+import { createClient } from '@/lib/supabase/client';
 import TaskCreateForm from '@/components/TaskCreateForm';
-import { MapPin, Clock, ChevronRight, Plus, X } from 'lucide-react';
+import { MapPin, Clock, ChevronRight, Plus, X, LogIn } from 'lucide-react';
 import Link from 'next/link';
+import type { User } from '@supabase/supabase-js';
 
 const statusConfig: Record<TaskStatus, { label: string; bg: string; text: string; dot: string }> = {
   OPEN:        { label: '募集中',       bg: 'bg-green-50',  text: 'text-green-700',  dot: 'bg-green-500' },
@@ -14,23 +16,39 @@ const statusConfig: Record<TaskStatus, { label: string; bg: string; text: string
   COMPLETED:   { label: '完了',         bg: 'bg-gray-100',  text: 'text-gray-500',   dot: 'bg-gray-400' },
 };
 
-const MY_CLIENT_ID = 'user-001';
-
 export default function DashboardPage() {
-  const myInitialTasks = mockTasks.filter((t) => t.clientId === MY_CLIENT_ID);
-  const [tasks, setTasks] = useState<Task[]>(myInitialTasks);
+  const [user, setUser] = useState<User | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
-  const handleTaskCreate = (data: Omit<Task, 'id' | 'createdAt' | 'clientId' | 'status'>) => {
-    const newTask: Task = {
-      ...data,
-      id: `task-${Date.now()}`,
-      status: 'OPEN',
-      clientId: MY_CLIENT_ID,
-      createdAt: new Date().toISOString(),
-    };
-    setTasks((prev) => [newTask, ...prev]);
-    setShowForm(false);
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      setUser(user);
+      if (user) {
+        try {
+          const myTasks = await getMyTasks(user.id);
+          setTasks(myTasks);
+        } catch {
+          // エラーは無視してempty状態を表示
+        }
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  const handleTaskCreate = async (data: Omit<Task, 'id' | 'createdAt' | 'clientId' | 'status'>) => {
+    if (!user) return;
+    setCreateError(null);
+    try {
+      const newTask = await createTask(user.id, data);
+      setTasks((prev) => [newTask, ...prev]);
+      setShowForm(false);
+    } catch (e) {
+      setCreateError('タスクの作成に失敗しました。もう一度お試しください。');
+    }
   };
 
   const stats = {
@@ -39,6 +57,39 @@ export default function DashboardPage() {
     inProgress: tasks.filter((t) => t.status === 'IN_PROGRESS' || t.status === 'ASSIGNED').length,
     completed: tasks.filter((t) => t.status === 'COMPLETED').length,
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#007B63] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 text-center px-4">
+        <div className="h-16 w-16 rounded-2xl bg-white border border-gray-100 flex items-center justify-center mb-2">
+          <LogIn className="h-7 w-7 text-gray-400" />
+        </div>
+        <h1 className="text-xl font-bold text-gray-900">ログインが必要です</h1>
+        <p className="text-sm text-gray-500">ダッシュボードを利用するにはGoogleでログインしてください。</p>
+        <button
+          onClick={async () => {
+            const supabase = createClient();
+            await supabase.auth.signInWithOAuth({
+              provider: 'google',
+              options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
+            });
+          }}
+          className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white mt-2"
+          style={{ background: '#007B63' }}
+        >
+          Googleでログイン
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -95,10 +146,7 @@ export default function DashboardPage() {
                   href={`/tasks/${task.id}`}
                   className="group flex items-center gap-4 bg-white rounded-2xl border border-gray-100 px-5 py-4 hover:border-gray-300 hover:shadow-sm transition-all duration-150"
                 >
-                  {/* Status dot */}
                   <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${s.dot}`} />
-
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${s.bg} ${s.text}`}>
@@ -114,13 +162,10 @@ export default function DashboardPage() {
                       {new Date(task.createdAt).toLocaleDateString('ja-JP')}
                     </p>
                   </div>
-
-                  {/* Reward */}
                   <div className="text-right shrink-0">
                     <p className="text-lg font-bold" style={{ color: '#007B63' }}>${task.reward}</p>
                     <p className="text-xs text-gray-400">USD</p>
                   </div>
-
                   <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-gray-500 transition-colors shrink-0" />
                 </Link>
               );
@@ -143,6 +188,9 @@ export default function DashboardPage() {
               </button>
             </div>
             <div className="px-7 py-6">
+              {createError && (
+                <p className="text-xs text-red-500 mb-4">{createError}</p>
+              )}
               <TaskCreateForm onTaskCreateAction={handleTaskCreate} />
             </div>
           </div>

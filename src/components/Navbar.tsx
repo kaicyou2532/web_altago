@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
+import AuthButton from '@/components/AuthButton';
 
 const navLinks = [
   { href: '/dashboard', label: 'タスクを依頼する' },
@@ -15,6 +17,42 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authUser, setAuthUser] = useState<{ name: string; avatarUrl?: string } | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setAuthUser({
+          name:
+            user.user_metadata?.full_name ??
+            user.user_metadata?.name ??
+            user.email?.split('@')[0] ??
+            'User',
+          avatarUrl: user.user_metadata?.avatar_url,
+        });
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      const u = session?.user;
+      if (u) {
+        setAuthUser({
+          name:
+            u.user_metadata?.full_name ??
+            u.user_metadata?.name ??
+            u.email?.split('@')[0] ??
+            'User',
+          avatarUrl: u.user_metadata?.avatar_url,
+        });
+      } else {
+        setAuthUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/95 backdrop-blur-md">
@@ -41,12 +79,9 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/dashboard"
-            className="ml-3 rounded-md px-5 py-2 text-sm font-semibold text-white transition-colors" style={{ background: '#007B63' }}
-          >
-            はじめる
-          </Link>
+          <div className="ml-3">
+            <AuthButton user={authUser} />
+          </div>
         </nav>
 
         {/* Mobile menu button */}
@@ -77,13 +112,9 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/dashboard"
-            onClick={() => setMenuOpen(false)}
-            className="mt-2 rounded-md px-4 py-3 text-sm font-semibold text-white text-center transition-colors" style={{ background: '#007B63' }}
-          >
-            はじめる
-          </Link>
+          <div className="mt-2 px-2">
+            <AuthButton user={authUser} />
+          </div>
         </nav>
       )}
     </header>

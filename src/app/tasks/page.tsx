@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { mockTasks } from '@/lib/mockData';
+import { useState, useEffect, useCallback } from 'react';
+import { getTasks } from '@/lib/api/tasks';
 import { Task, TaskStatus } from '@/types';
 import { MapPin, DollarSign, ChevronRight, Search } from 'lucide-react';
 import Link from 'next/link';
@@ -21,10 +21,18 @@ const STATUS_COLOR: Record<TaskStatus, string> = {
 };
 
 export default function TasksPage() {
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'ALL'>('ALL');
 
-  const filtered = mockTasks.filter((t) => {
+  useEffect(() => {
+    getTasks()
+      .then(setAllTasks)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = allTasks.filter((t) => {
     const matchStatus = filterStatus === 'ALL' || t.status === filterStatus;
     const matchQuery =
       query === '' ||
@@ -33,7 +41,7 @@ export default function TasksPage() {
     return matchStatus && matchQuery;
   });
 
-  const openCount = mockTasks.filter((t) => t.status === 'OPEN').length;
+  const openCount = allTasks.filter((t) => t.status === 'OPEN').length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,7 +54,7 @@ export default function TasksPage() {
           <h1 className="text-2xl font-bold text-gray-950 mb-1">オープンタスク</h1>
           <p className="text-sm text-gray-500">
             現在{' '}
-            <span className="font-semibold text-gray-900">{openCount}件</span>{' '}
+            <span className="font-semibold text-gray-900">{loading ? '...' : openCount}件</span>{' '}
             の依頼が募集中です
           </p>
         </div>
@@ -54,7 +62,6 @@ export default function TasksPage() {
 
       {/* Filters */}
       <div className="max-w-3xl mx-auto px-4 py-4 space-y-3">
-        {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -67,7 +74,6 @@ export default function TasksPage() {
           />
         </div>
 
-        {/* Status filter */}
         <div className="flex gap-2 flex-wrap">
           {(['ALL', 'OPEN', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED'] as const).map((s) => (
             <button
@@ -88,7 +94,11 @@ export default function TasksPage() {
 
       {/* Task list */}
       <div className="max-w-3xl mx-auto px-4 pb-16 space-y-3">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <div className="w-6 h-6 border-2 border-[#007B63] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-gray-400 text-sm">
             条件に一致するタスクがありません
           </div>
@@ -108,11 +118,8 @@ function TaskCard({ task }: { task: Task }) {
       <div className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            {/* Status + Location */}
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR[task.status]}`}
-              >
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR[task.status]}`}>
                 {STATUS_LABEL[task.status]}
               </span>
               <span className="flex items-center gap-1 text-xs text-gray-400">
@@ -120,19 +127,13 @@ function TaskCard({ task }: { task: Task }) {
                 {task.location}
               </span>
             </div>
-
-            {/* Title */}
             <p className="text-sm font-semibold text-gray-900 leading-snug mb-1 line-clamp-2">
               {task.title}
             </p>
-
-            {/* Description preview */}
             <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
               {task.description}
             </p>
           </div>
-
-          {/* Reward + Arrow */}
           <div className="flex flex-col items-end gap-2 shrink-0">
             <div className="flex items-center gap-0.5 font-bold text-gray-900">
               <DollarSign className="w-4 h-4" />
@@ -141,7 +142,6 @@ function TaskCard({ task }: { task: Task }) {
             <ChevronRight className="w-4 h-4 text-gray-300" />
           </div>
         </div>
-
         {isApplyable && (
           <div className="mt-3 pt-3 border-t border-gray-100">
             <span
