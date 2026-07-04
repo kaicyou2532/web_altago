@@ -65,6 +65,8 @@ Before syncing with Argo CD:
 3. Update `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `k8s/base/configmap.yaml`.
 4. Update the Ingress host in `k8s/base/ingress.yaml`.
 
+Use the same `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` values for `docker build --build-arg`, because Next.js embeds `NEXT_PUBLIC_*` values into the browser bundle at build time.
+
 Apply the Argo CD application from your k3s kubeconfig:
 
 ```bash
