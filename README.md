@@ -53,3 +53,22 @@ docker push your-registry/alta-go:latest
 ```
 
 The container listens on port `3000`.
+
+## Deploy to k3s with Argo CD
+
+Kubernetes manifests are in `k8s/base`, and the Argo CD `Application` is in `k8s/argocd/application.yaml`.
+
+Before syncing with Argo CD:
+
+1. Build and push the image to your registry.
+2. Update the image in `k8s/base/deployment.yaml` or `k8s/base/kustomization.yaml`.
+3. Update `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `k8s/base/configmap.yaml`.
+4. Update the Ingress host in `k8s/base/ingress.yaml`.
+
+Apply the Argo CD application from your k3s kubeconfig:
+
+```bash
+kubectl apply -f k8s/argocd/application.yaml
+```
+
+The default manifests assume k3s' bundled Traefik ingress controller and expose the app at `http://alta-go.local`.
