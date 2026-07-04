@@ -1,6 +1,5 @@
 'use client';
 
-/* eslint-disable @next/next/no-serialize-whole-module */
 import { useState } from 'react';
 import { Task } from '@/types';
 
