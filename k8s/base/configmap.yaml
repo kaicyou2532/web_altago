@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: alta-go-env
-  namespace: alta-go
-data:
-  NEXT_PUBLIC_SUPABASE_URL: "https://your-project.supabase.co"
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: "replace-with-your-supabase-anon-key"

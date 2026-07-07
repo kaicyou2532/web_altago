@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, ShoppingBag, FileText, Gift, MapPin, Star, Zap, CheckCircle2 } from 'lucide-react';
 import { getTasks } from '@/lib/api/tasks';
 import { Task } from '@/types';
@@ -93,7 +94,7 @@ export default function HomePage() {
                 世界中に、<br />あなたの<br />身体を。
               </h1>
               <p className="animate-on-scroll delay-200 text-base text-black/50 leading-relaxed mb-10 max-w-sm">
-                海外に行けなくても大丈夫。Altago なら、世界中の現地ワーカー（Runner）があなたの代わりに動きます。
+                遠くに行けなくても大丈夫。Altago なら、世界中の現地ワーカー（Runner）があなたの代わりに動きます。
               </p>
               <div className="animate-on-scroll delay-300 flex flex-col sm:flex-row gap-3">
                 <Link
@@ -110,7 +111,7 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="animate-on-scroll delay-400 mt-10 flex flex-wrap gap-6">
-                {['安全な決済保護', 'チャットで進捗確認', '世界50カ国以上対応'].map((t) => (
+                {[].map((t) => (
                   <span key={t} className="inline-flex items-center gap-1.5 text-xs text-black/40 font-medium">
                     <CheckCircle2 className="h-3.5 w-3.5 text-[#007B63]" />
                     {t}
@@ -119,34 +120,16 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right: stacked cards */}
-            <div className="animate-on-scroll-scale delay-200 relative hidden lg:flex items-center justify-center">
-              <div className="absolute inset-0 rounded-2xl bg-[#F6F6F6]" />
-              <div className="relative w-full max-w-sm p-8 space-y-4">
-                {liveTasks.slice(0, 3).map((task, i) => {
-                  const status = statusLabel[task.status];
-                  return (
-                    <div
-                      key={task.id}
-                      style={{ transform: `translateX(${i * 8}px)` }}
-                      className="bg-white rounded-xl border border-black/5 shadow-sm p-4"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-black line-clamp-1">{task.title}</p>
-                          <div className="flex items-center gap-1 mt-1 text-xs text-black/40">
-                            <MapPin className="h-3 w-3" />{task.location}
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-1 shrink-0">
-                          <span className="text-base font-bold text-[#007B63]">${task.reward}</span>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${status.color}`}>{status.label}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            {/* Right */}
+            <div className="animate-on-scroll-scale delay-200 relative flex items-center justify-center">
+              <Image
+                src="/hero-global-gig.svg"
+                alt="スマホでの現物確認、忘れ物回収、海外発送、現地調査を世界中のランナーが代行するイラスト"
+                width={1024}
+                height={1024}
+                priority
+                className="w-full max-w-md lg:max-w-xl rounded-2xl border border-black/5 shadow-sm"
+              />
             </div>
           </div>
         </div>

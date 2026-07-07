@@ -35,42 +35,29 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## Docker Image
+## Deploy with Coolify
 
-Build the production image before deploying it with Argo CD:
+This app includes a production Dockerfile for Coolify. Use the Dockerfile build pack and expose port `3000`.
+
+Set these variables in Coolify as build variables and runtime environment variables:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+`NEXT_PUBLIC_*` values are embedded into the browser bundle at build time, so the same values must be available during the image build.
+
+You can test the image locally with:
 
 ```bash
 docker build \
   --build-arg NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
   --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
-  -t your-registry/alta-go:latest .
+  -t alta-go:latest .
 ```
-
-Push the image from CI, then reference the pushed tag from your Kubernetes manifests:
 
 ```bash
-docker push your-registry/alta-go:latest
+docker run --rm -p 3000:3000 \
+  -e NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+  alta-go:latest
 ```
-
-The container listens on port `3000`.
-
-## Deploy to k3s with Argo CD
-
-Kubernetes manifests are in `k8s/base`, and the Argo CD `Application` is in `k8s/argocd/application.yaml`.
-
-Before syncing with Argo CD:
-
-1. Build and push the image to your registry.
-2. Update the image in `k8s/base/deployment.yaml` or `k8s/base/kustomization.yaml`.
-3. Update `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `k8s/base/configmap.yaml`.
-4. Update the Ingress host in `k8s/base/ingress.yaml`.
-
-Use the same `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` values for `docker build --build-arg`, because Next.js embeds `NEXT_PUBLIC_*` values into the browser bundle at build time.
-
-Apply the Argo CD application from your k3s kubeconfig:
-
-```bash
-kubectl apply -f k8s/argocd/application.yaml
-```
-
-The default manifests assume k3s' bundled Traefik ingress controller and expose the app at `http://alta-go.local`.
