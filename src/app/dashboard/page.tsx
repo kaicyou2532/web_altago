@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { Task, TaskStatus } from '@/types';
-import { getMyTasks, createTask } from '@/lib/api/tasks';
+import { getMyTasks, createTask, type CreateTaskInput } from '@/lib/api/tasks';
 import { createClient } from '@/lib/supabase/client';
 import TaskCreateForm from '@/components/TaskCreateForm';
 import { MapPin, Clock, ChevronRight, Plus, X, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import type { User } from '@supabase/supabase-js';
+import { formatReward } from '@/lib/currency';
 
 const statusConfig: Record<TaskStatus, { label: string; bg: string; text: string; dot: string }> = {
   OPEN:        { label: '募集中',       bg: 'bg-green-50',  text: 'text-green-700',  dot: 'bg-green-500' },
@@ -39,14 +40,14 @@ export default function DashboardPage() {
     });
   }, []);
 
-  const handleTaskCreate = async (data: Omit<Task, 'id' | 'createdAt' | 'clientId' | 'status'>) => {
+  const handleTaskCreate = async (data: CreateTaskInput) => {
     if (!user) return;
     setCreateError(null);
     try {
       const newTask = await createTask(user.id, data);
       setTasks((prev) => [newTask, ...prev]);
       setShowForm(false);
-    } catch (e) {
+    } catch {
       setCreateError('タスクの作成に失敗しました。もう一度お試しください。');
     }
   };
@@ -163,8 +164,8 @@ export default function DashboardPage() {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-lg font-bold" style={{ color: '#007B63' }}>${task.reward}</p>
-                    <p className="text-xs text-gray-400">USD</p>
+                    <p className="text-lg font-bold" style={{ color: '#007B63' }}>{formatReward(task.reward, task.currency)}</p>
+                    <p className="text-xs text-gray-400">{task.currency}</p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-gray-500 transition-colors shrink-0" />
                 </Link>
@@ -177,7 +178,7 @@ export default function DashboardPage() {
       {/* Create task modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white shadow-2xl">
             <div className="flex items-center justify-between px-7 pt-6 pb-4 border-b border-gray-100">
               <h2 className="text-base font-bold text-gray-900">新しいタスクを作成</h2>
               <button

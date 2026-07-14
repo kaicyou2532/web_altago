@@ -86,6 +86,7 @@ CREATE TABLE tasks (
     -- 報酬
     reward_usd      NUMERIC(10,2)   NOT NULL CHECK (reward_usd > 0),
     currency        CHAR(3)         NOT NULL DEFAULT 'USD',
+    tags            TEXT[]          NOT NULL DEFAULT '{}',
     -- ステータス
     status          task_status     NOT NULL DEFAULT 'OPEN',
     -- 実行期限

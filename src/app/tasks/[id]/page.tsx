@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Task, Message, TaskStatus } from '@/types';
 import { MapPin, ArrowLeft, Send, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
+import { formatReward } from '@/lib/currency';
 
 const STATUS_LABEL: Record<TaskStatus, string> = {
   OPEN: '募集中',
@@ -146,11 +147,10 @@ export default function TaskDetailPage() {
                 <MapPin className="w-4 h-4" />
                 {task.location}
               </span>
-              <span className="flex items-center gap-1 font-semibold text-gray-900">
-                <span className="text-base">$</span>
-                {task.reward}
-              </span>
+              <span className="flex items-center gap-1 font-semibold text-gray-900">{formatReward(task.reward, task.currency)}</span>
             </div>
+
+            {task.tags.length > 0 && <div className="flex flex-wrap gap-2">{task.tags.map((tag) => <span key={tag} className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-500">#{tag}</span>)}</div>}
 
             <hr className="border-gray-100" />
 

@@ -1,10 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { getTasks } from '@/lib/api/tasks';
 import { Task, TaskStatus } from '@/types';
-import { MapPin, DollarSign, ChevronRight, Search } from 'lucide-react';
+import { MapPin, ChevronRight, Search, List, Map as MapIcon } from 'lucide-react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import type { LatLngBounds } from 'leaflet';
+import { formatReward } from '@/lib/currency';
+
+const TasksMap = dynamic(() => import('@/components/TasksMap'), { ssr: false, loading: () => <div className="h-full animate-pulse bg-gray-100" /> });
 
 const STATUS_LABEL: Record<TaskStatus, string> = {
   OPEN: '募集中',
@@ -25,6 +30,8 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'ALL'>('ALL');
+  const [view, setView] = useState<'list' | 'map'>('list');
+  const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
 
   useEffect(() => {
     getTasks()
@@ -38,7 +45,8 @@ export default function TasksPage() {
       query === '' ||
       t.title.toLowerCase().includes(query.toLowerCase()) ||
       t.location.toLowerCase().includes(query.toLowerCase());
-    return matchStatus && matchQuery;
+    const matchBounds = view !== 'map' || !mapBounds || t.latitude == null || t.longitude == null || mapBounds.contains([t.latitude, t.longitude]);
+    return matchStatus && matchQuery && matchBounds;
   });
 
   const openCount = allTasks.filter((t) => t.status === 'OPEN').length;
@@ -61,7 +69,7 @@ export default function TasksPage() {
       </div>
 
       {/* Filters */}
-      <div className="max-w-3xl mx-auto px-4 py-4 space-y-3">
+      <div className="max-w-6xl mx-auto px-4 py-4 space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -89,14 +97,23 @@ export default function TasksPage() {
               {s === 'ALL' ? 'すべて' : STATUS_LABEL[s]}
             </button>
           ))}
+          <div className="ml-auto flex rounded-lg border border-gray-200 bg-white p-1">
+            <button onClick={() => setView('list')} className={`flex items-center gap-1 rounded-md px-3 py-1 text-xs ${view === 'list' ? 'bg-gray-900 text-white' : 'text-gray-500'}`}><List className="h-3.5 w-3.5" />一覧</button>
+            <button onClick={() => setView('map')} className={`flex items-center gap-1 rounded-md px-3 py-1 text-xs ${view === 'map' ? 'bg-gray-900 text-white' : 'text-gray-500'}`}><MapIcon className="h-3.5 w-3.5" />地図</button>
+          </div>
         </div>
       </div>
 
       {/* Task list */}
-      <div className="max-w-3xl mx-auto px-4 pb-16 space-y-3">
+      <div className="max-w-6xl mx-auto px-4 pb-16 space-y-3">
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="w-6 h-6 border-2 border-[#007B63] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : view === 'map' ? (
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+            <div className="h-[65vh] overflow-hidden rounded-2xl border border-gray-200 bg-white"><TasksMap tasks={allTasks} onBoundsChangeAction={setMapBounds} /></div>
+            <div className="max-h-[65vh] space-y-3 overflow-y-auto">{filtered.length ? filtered.map((task) => <TaskCard key={task.id} task={task} />) : <p className="rounded-xl bg-white p-6 text-sm text-gray-400">この地図範囲にタスクはありません</p>}</div>
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 text-gray-400 text-sm">
@@ -135,10 +152,7 @@ function TaskCard({ task }: { task: Task }) {
             </p>
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
-            <div className="flex items-center gap-0.5 font-bold text-gray-900">
-              <DollarSign className="w-4 h-4" />
-              <span className="text-lg">{task.reward}</span>
-            </div>
+            <div className="font-bold text-gray-900"><span className="text-lg">{formatReward(task.reward, task.currency)}</span></div>
             <ChevronRight className="w-4 h-4 text-gray-300" />
           </div>
         </div>
@@ -152,6 +166,7 @@ function TaskCard({ task }: { task: Task }) {
             </span>
           </div>
         )}
+        {task.tags.length > 0 && <div className="mt-3 flex flex-wrap gap-1.5">{task.tags.map((tag) => <span key={tag} className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500">#{tag}</span>)}</div>}
       </div>
     </Link>
   );

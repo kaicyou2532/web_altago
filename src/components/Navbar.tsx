@@ -12,6 +12,7 @@ import AuthButton from '@/components/AuthButton';
 const navLinks = [
   { href: '/dashboard', label: 'タスクを依頼する' },
   { href: '/tasks', label: 'タスクを探す' },
+  { href: '/mypage', label: 'マイページ', authOnly: true },
 ];
 
 export default function Navbar() {
@@ -65,7 +66,7 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <nav className="hidden sm:flex items-center gap-1">
-          {navLinks.map((link) => (
+          {navLinks.filter((link) => !link.authOnly || authUser).map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -97,7 +98,7 @@ export default function Navbar() {
       {/* Mobile nav */}
       {menuOpen && (
         <nav className="sm:hidden border-t border-gray-100 bg-white px-4 pb-4 pt-2 flex flex-col gap-1">
-          {navLinks.map((link) => (
+          {navLinks.filter((link) => !link.authOnly || authUser).map((link) => (
             <Link
               key={link.href}
               href={link.href}

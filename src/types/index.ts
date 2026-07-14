@@ -6,6 +6,10 @@ export interface Task {
   description: string;
   location: string;       // city（表示用）
   reward: number;         // reward_usd
+  currency: string;
+  tags: string[];
+  latitude?: number;
+  longitude?: number;
   status: TaskStatus;
   clientId: string;
   runnerId?: string;
@@ -43,6 +47,7 @@ export interface DbTask {
   longitude: number | null;
   reward_usd: number;
   currency: string;
+  tags: string[] | null;
   status: TaskStatus;
   deadline: string | null;
   created_at: string;
@@ -67,6 +72,10 @@ export function mapDbTask(row: DbTask): Task {
     description: row.description,
     location: row.city,
     reward: Number(row.reward_usd),
+    currency: row.currency,
+    tags: row.tags ?? [],
+    latitude: row.latitude ?? undefined,
+    longitude: row.longitude ?? undefined,
     status: row.status,
     clientId: row.client_id,
     runnerId: row.runner_id ?? undefined,
@@ -84,4 +93,3 @@ export function mapDbMessage(row: DbMessage): Message {
     createdAt: row.created_at,
   };
 }
-

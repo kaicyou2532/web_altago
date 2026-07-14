@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
-import type { Task, DbTask, mapDbTask as MapFn } from '@/types';
+import type { Task, DbTask } from '@/types';
 import { mapDbTask } from '@/types';
 
 export type CreateTaskInput = {
@@ -7,6 +7,10 @@ export type CreateTaskInput = {
   description: string;
   location: string;
   reward: number;
+  currency: string;
+  tags: string[];
+  latitude: number;
+  longitude: number;
 };
 
 /** 全 OPEN タスク（Runner向けタスク一覧） */
@@ -71,6 +75,10 @@ export async function createTask(
       city,
       country_code: 'XX',
       reward_usd: input.reward,
+      currency: input.currency,
+      tags: input.tags,
+      latitude: input.latitude,
+      longitude: input.longitude,
     })
     .select()
     .single();

@@ -2,10 +2,16 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowRight, ShoppingBag, FileText, Gift, MapPin, Star, Zap, CheckCircle2 } from 'lucide-react';
 import { getTasks } from '@/lib/api/tasks';
 import { Task } from '@/types';
+import { formatReward } from '@/lib/currency';
+
+const taskExamples = [
+  { title: 'パリの蚤の市でヴィンテージ時計を確認', location: 'Paris, France', reward: '$60', tag: '現物確認' },
+  { title: 'ホテルの忘れ物を回収してDHL発送', location: 'Los Angeles, USA', reward: '$45', tag: '回収・発送' },
+  { title: '留学先周辺の夜道を動画レポート', location: 'Seoul, Korea', reward: '₩48,000', tag: '現地調査' },
+];
 
 /* スクロールアニメーション用フック */
 function useScrollAnimation() {
@@ -121,15 +127,18 @@ export default function HomePage() {
             </div>
 
             {/* Right */}
-            <div className="animate-on-scroll-scale delay-200 relative flex items-center justify-center">
-              <Image
-                src="/hero-global-gig.svg"
-                alt="スマホでの現物確認、忘れ物回収、海外発送、現地調査を世界中のランナーが代行するイラスト"
-                width={1024}
-                height={1024}
-                priority
-                className="w-full max-w-md lg:max-w-xl rounded-2xl border border-black/5 shadow-sm"
-              />
+            <div className="animate-on-scroll-scale delay-200 relative mx-auto w-full max-w-lg">
+              <div className="absolute -inset-8 rounded-full bg-[#007B63]/5 blur-3xl" />
+              <div className="relative space-y-3 rounded-3xl border border-black/5 bg-[#f8faf9] p-4 shadow-xl shadow-black/5 sm:p-6">
+                <div className="flex items-center justify-between px-1 pb-2"><p className="text-xs font-bold uppercase tracking-[0.18em] text-black/35">Previous tasks</p><span className="h-2 w-2 rounded-full bg-[#00a882]" /></div>
+                {taskExamples.map((task, index) => (
+                  <div key={task.title} className={`rounded-2xl border border-black/5 bg-white p-5 shadow-sm ${index === 1 ? 'sm:translate-x-5' : ''}`}>
+                    <div className="mb-3 flex items-center justify-between gap-3"><span className="rounded-full bg-[#e6f4f1] px-2.5 py-1 text-[11px] font-semibold text-[#007B63]">{task.tag}</span><strong>{task.reward}</strong></div>
+                    <p className="text-sm font-bold text-black">{task.title}</p>
+                    <p className="mt-2 flex items-center gap-1 text-xs text-black/40"><MapPin className="h-3 w-3 text-[#007B63]" />{task.location}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -211,7 +220,7 @@ export default function HomePage() {
                 <div key={task.id} className={`border border-black/5 rounded-xl p-6 hover:border-black/20 hover:shadow-sm transition-all animate-on-scroll delay-${(i % 5 + 1) * 100}`}>
                   <div className="flex items-center justify-between mb-4">
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${status.color}`}>{status.label}</span>
-                    <span className="text-xl font-black text-[#007B63]">${task.reward}</span>
+                    <span className="text-xl font-black text-[#007B63]">{formatReward(task.reward, task.currency)}</span>
                   </div>
                   <h3 className="font-semibold text-black line-clamp-2 mb-3 text-sm leading-snug">{task.title}</h3>
                   <div className="flex items-center gap-1.5 text-xs text-black/40">
