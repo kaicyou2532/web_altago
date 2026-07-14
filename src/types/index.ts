@@ -68,6 +68,7 @@ export interface DbTask {
 export interface DbMessage {
   id: string;
   task_id: string;
+  application_id: string | null;
   sender_id: string;
   content: string;
   is_read: boolean;

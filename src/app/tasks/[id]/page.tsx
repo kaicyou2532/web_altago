@@ -4,11 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getTaskById, applyToTask, getMyApplication } from '@/lib/api/tasks';
 import { getMessages, sendMessage } from '@/lib/api/messages';
+import { getTaskApplications, type TaskApplicationDetails } from '@/lib/api/applications';
 import { createClient } from '@/lib/supabase/client';
 import { Task, Message, TaskStatus, Application } from '@/types';
-import { MapPin, ArrowLeft, Send, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { MapPin, ArrowLeft, Send, CheckCircle2, Clock, AlertCircle, MessageCircle, Star } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import { formatReward } from '@/lib/currency';
+import Link from 'next/link';
 
 const STATUS_LABEL: Record<TaskStatus, string> = {
   OPEN: '募集中',
@@ -34,6 +36,7 @@ export default function TaskDetailPage() {
   const [application, setApplication] = useState<Application | null>(null);
   const [applicationMessage, setApplicationMessage] = useState('');
   const [applicationError, setApplicationError] = useState<string | null>(null);
+  const [taskApplications, setTaskApplications] = useState<TaskApplicationDetails[]>([]);
   const [applying, setApplying] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -67,6 +70,14 @@ export default function TaskDetailPage() {
       .then(setApplication)
       .catch((error) => console.error('Failed to load application:', error));
   }, [id, user]);
+
+  // 依頼者向け応募者一覧
+  useEffect(() => {
+    if (!id || !user || !task || user.id !== task.clientId) return;
+    getTaskApplications(id)
+      .then(setTaskApplications)
+      .catch((error) => console.error('Failed to load task applications:', error));
+  }, [id, task, user]);
 
   // 新着メッセージで自動スクロール
   useEffect(() => {
@@ -234,11 +245,11 @@ export default function TaskDetailPage() {
             )}
 
             {application && (
-              <div
-                className="w-full py-3 rounded-xl text-sm font-semibold text-center"
-                style={{ backgroundColor: '#e6f4f1', color: '#007B63' }}
-              >
-                ✓ 応募済み（{application.status === 'PENDING' ? '承認待ち' : application.status === 'ACCEPTED' ? '採用' : application.status === 'REJECTED' ? '不採用' : '辞退済み'}）
+              <div className="space-y-3 rounded-xl p-4 text-sm" style={{ backgroundColor: '#e6f4f1', color: '#007B63' }}>
+                <p className="text-center font-semibold">✓ 応募済み（{application.status === 'PENDING' ? '承認待ち' : application.status === 'ACCEPTED' ? '採用' : application.status === 'REJECTED' ? '不採用' : '辞退済み'}）</p>
+                <Link href={`/tasks/${task.id}/applications/${application.id}`} className="flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 font-semibold shadow-sm hover:bg-emerald-50">
+                  <MessageCircle className="h-4 w-4" />依頼者とチャットする
+                </Link>
               </div>
             )}
 
@@ -249,6 +260,44 @@ export default function TaskDetailPage() {
             )}
           </div>
         </div>
+
+        {isClient && (
+          <section className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3">
+              <h2 className="text-sm font-semibold text-gray-800">応募者</h2>
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-500">{taskApplications.length}人</span>
+            </div>
+            {taskApplications.length === 0 ? (
+              <p className="px-5 py-8 text-center text-sm text-gray-400">まだ応募はありません</p>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {taskApplications.map((candidate) => (
+                  <div key={candidate.id} className="p-5">
+                    <div className="flex items-start gap-3">
+                      {candidate.runnerAvatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={candidate.runnerAvatarUrl} alt="" className="h-11 w-11 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700">{candidate.runnerName.slice(0, 1)}</div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-semibold text-gray-900">{candidate.runnerName}</p>
+                          <span className="flex items-center gap-1 text-xs text-amber-600"><Star className="h-3.5 w-3.5 fill-current" />{candidate.runnerRating.toFixed(1)}</span>
+                          {candidate.runnerCity && <span className="text-xs text-gray-400">{candidate.runnerCity}</span>}
+                        </div>
+                        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-gray-600">{candidate.message || '応募メッセージはありません'}</p>
+                      </div>
+                    </div>
+                    <Link href={`/tasks/${task.id}/applications/${candidate.id}`} className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-200 px-4 py-2.5 text-sm font-semibold text-[#007B63] hover:bg-emerald-50">
+                      <MessageCircle className="h-4 w-4" />この応募者とチャット
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Chat */}
         {showChat && (
