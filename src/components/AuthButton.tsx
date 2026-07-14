@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useState } from 'react';
 
 interface Props {
   user: { name: string; avatarUrl?: string } | null;
@@ -10,6 +11,7 @@ interface Props {
 
 export default function AuthButton({ user }: Props) {
   const router = useRouter();
+  const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
 
   async function signIn() {
     const supabase = createClient();
@@ -31,16 +33,19 @@ export default function AuthButton({ user }: Props) {
   if (user) {
     return (
       <div className="flex items-center gap-3">
-        {user.avatarUrl ? (
-          <Image
-            src={user.avatarUrl}
-            alt={user.name}
-            width={28}
-            height={28}
-            className="rounded-full"
-          />
+        {user.avatarUrl && user.avatarUrl !== failedAvatarUrl ? (
+          <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-gray-100">
+            <Image
+              src={user.avatarUrl}
+              alt=""
+              fill
+              sizes="28px"
+              className="object-cover"
+              onError={() => setFailedAvatarUrl(user.avatarUrl ?? null)}
+            />
+          </span>
         ) : (
-          <div className="w-7 h-7 rounded-full bg-[#007B63] flex items-center justify-center text-white text-xs font-bold">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#007B63] text-xs font-bold text-white">
             {user.name.charAt(0).toUpperCase()}
           </div>
         )}
