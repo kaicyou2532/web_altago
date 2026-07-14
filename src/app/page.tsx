@@ -71,8 +71,8 @@ export default function HomePage() {
   const pageRef = useScrollAnimation();
 
   useEffect(() => {
-    getTasks({ status: 'OPEN' })
-      .then((tasks) => setLiveTasks(tasks.slice(0, 6)))
+    getTasks({ status: 'OPEN', pageSize: 6 })
+      .then(({ tasks }) => setLiveTasks(tasks))
       .catch(() => setLiveTasks([]));
   }, []);
 

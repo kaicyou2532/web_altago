@@ -33,6 +33,17 @@ export interface Message {
   createdAt: string;
 }
 
+export type ApplicationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
+
+export interface Application {
+  id: string;
+  taskId: string;
+  runnerId: string;
+  message?: string;
+  status: ApplicationStatus;
+  createdAt: string;
+}
+
 /* ── DB 行型（snake_case のまま） ── */
 export interface DbTask {
   id: string;
