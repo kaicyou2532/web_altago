@@ -28,6 +28,7 @@ const STATUS_COLOR: Record<TaskStatus, string> = {
 export default function TasksPage() {
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'ALL'>('ALL');
   const [view, setView] = useState<'list' | 'map'>('list');
@@ -36,6 +37,10 @@ export default function TasksPage() {
   useEffect(() => {
     getTasks()
       .then(setAllTasks)
+      .catch((error) => {
+        console.error('Failed to load tasks:', error);
+        setLoadError('タスクを読み込めませんでした。SupabaseのAPI設定と権限を確認してください。');
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -106,7 +111,9 @@ export default function TasksPage() {
 
       {/* Task list */}
       <div className="max-w-6xl mx-auto px-4 pb-16 space-y-3">
-        {loading ? (
+        {loadError ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">{loadError}</div>
+        ) : loading ? (
           <div className="flex justify-center py-16">
             <div className="w-6 h-6 border-2 border-[#007B63] border-t-transparent rounded-full animate-spin" />
           </div>

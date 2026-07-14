@@ -199,15 +199,17 @@ CREATE INDEX idx_reviews_reviewee ON reviews(reviewee_id);
 CREATE OR REPLACE FUNCTION update_user_rating()
 RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE users
+    UPDATE altago.users
     SET
-        rating_avg   = (SELECT AVG(rating)   FROM reviews WHERE reviewee_id = NEW.reviewee_id),
-        rating_count = (SELECT COUNT(*)       FROM reviews WHERE reviewee_id = NEW.reviewee_id),
+        rating_avg   = COALESCE((SELECT AVG(rating) FROM altago.reviews WHERE reviewee_id = NEW.reviewee_id), 0),
+        rating_count = (SELECT COUNT(*) FROM altago.reviews WHERE reviewee_id = NEW.reviewee_id),
         updated_at   = NOW()
     WHERE id = NEW.reviewee_id;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = altago, public;
 
 CREATE TRIGGER trg_update_rating
 AFTER INSERT OR UPDATE ON reviews
@@ -372,3 +374,16 @@ CREATE POLICY "payments: select own"
 -- ----- reviews -----
 CREATE POLICY "reviews: select all"   ON altago.reviews FOR SELECT USING (true);
 CREATE POLICY "reviews: insert auth"  ON altago.reviews FOR INSERT WITH CHECK (auth.uid() = reviewer_id);
+
+-- =============================================================
+-- PostgREST API ロール権限（行単位の可否は上記RLSが制御）
+-- =============================================================
+GRANT USAGE ON SCHEMA altago TO anon, authenticated, service_role;
+GRANT SELECT ON altago.users, altago.tasks, altago.reviews TO anon, authenticated;
+GRANT INSERT, UPDATE ON altago.users, altago.tasks, altago.reviews TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON
+  altago.applications,
+  altago.messages,
+  altago.proofs,
+  altago.payments
+TO authenticated;
