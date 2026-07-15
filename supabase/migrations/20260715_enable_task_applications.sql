@@ -1,3 +1,34 @@
+-- 今後作成されるOAuthユーザーのプロフィールを自動作成する。
+CREATE OR REPLACE FUNCTION altago.handle_new_auth_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = altago
+AS $$
+BEGIN
+  INSERT INTO altago.users (id, name, email, avatar_url)
+  VALUES (
+    NEW.id,
+    COALESCE(
+      NEW.raw_user_meta_data->>'full_name',
+      NEW.raw_user_meta_data->>'name',
+      split_part(NEW.email, '@', 1)
+    ),
+    NEW.email,
+    NEW.raw_user_meta_data->>'avatar_url'
+  )
+  ON CONFLICT DO NOTHING;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW
+EXECUTE FUNCTION altago.handle_new_auth_user();
+
 -- 既存OAuthユーザーにプロフィールがない場合、応募の外部キー制約を満たすため補完する。
 INSERT INTO altago.users (id, name, email, avatar_url)
 SELECT

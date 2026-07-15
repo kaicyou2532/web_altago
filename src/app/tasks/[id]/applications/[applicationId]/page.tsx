@@ -135,7 +135,7 @@ export default function ApplicationChatPage() {
               }}
               rows={2}
               maxLength={2000}
-              placeholder="メッセージを入力（Shift+Enterで改行）"
+              placeholder="このメッセージはDMではなく「口コミ」なので、電気通信事業者の届出は必要ありません！！！"
               className="min-h-11 flex-1 resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#007B63] focus:ring-2 focus:ring-emerald-100"
             />
             <button type="button" onClick={handleSend} disabled={!input.trim() || sending} className="self-end rounded-lg bg-[#007B63] p-3 text-white disabled:cursor-not-allowed disabled:opacity-40" aria-label="送信"><Send className="h-5 w-5" /></button>
