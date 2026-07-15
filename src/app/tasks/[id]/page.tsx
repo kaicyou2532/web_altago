@@ -71,13 +71,13 @@ export default function TaskDetailPage() {
       .catch((error) => console.error('Failed to load application:', error));
   }, [id, user]);
 
-  // 依頼者向け応募者一覧
+  // 公開チャット一覧
   useEffect(() => {
-    if (!id || !user || !task || user.id !== task.clientId) return;
+    if (!id || !task) return;
     getTaskApplications(id)
       .then(setTaskApplications)
       .catch((error) => console.error('Failed to load task applications:', error));
-  }, [id, task, user]);
+  }, [id, task]);
 
   // 新着メッセージで自動スクロール
   useEffect(() => {
@@ -261,15 +261,15 @@ export default function TaskDetailPage() {
           </div>
         </div>
 
-        {isClient && (
+        {taskApplications.length > 0 && (
           <section className="overflow-hidden rounded-xl border border-gray-200 bg-white">
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3">
-              <h2 className="text-sm font-semibold text-gray-800">応募者</h2>
-              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-500">{taskApplications.length}人</span>
+              <div>
+                <h2 className="text-sm font-semibold text-gray-800">公開チャット</h2>
+                <p className="mt-0.5 text-xs text-gray-400">応募者との会話は誰でも閲覧できます</p>
+              </div>
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-500">{taskApplications.length}件</span>
             </div>
-            {taskApplications.length === 0 ? (
-              <p className="px-5 py-8 text-center text-sm text-gray-400">まだ応募はありません</p>
-            ) : (
               <div className="divide-y divide-gray-100">
                 {taskApplications.map((candidate) => (
                   <div key={candidate.id} className="p-5">
@@ -290,12 +290,11 @@ export default function TaskDetailPage() {
                       </div>
                     </div>
                     <Link href={`/tasks/${task.id}/applications/${candidate.id}`} className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-200 px-4 py-2.5 text-sm font-semibold text-[#007B63] hover:bg-emerald-50">
-                      <MessageCircle className="h-4 w-4" />この応募者とチャット
+                      <MessageCircle className="h-4 w-4" />公開チャットを見る
                     </Link>
                   </div>
                 ))}
               </div>
-            )}
           </section>
         )}
 
