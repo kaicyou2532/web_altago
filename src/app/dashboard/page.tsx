@@ -41,14 +41,26 @@ export default function DashboardPage() {
   }, []);
 
   const handleTaskCreate = async (data: CreateTaskInput) => {
-    if (!user) return;
+    if (!user) throw new Error('ログインが必要です');
     setCreateError(null);
     try {
       const newTask = await createTask(user.id, data);
       setTasks((prev) => [newTask, ...prev]);
       setShowForm(false);
-    } catch {
-      setCreateError('タスクの作成に失敗しました。もう一度お試しください。');
+    } catch (error) {
+      console.error('Failed to create task:', error);
+      const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : '';
+      const message = typeof error === 'object' && error && 'message' in error ? String(error.message) : '';
+      setCreateError(
+        code === '23503'
+          ? 'ユーザープロフィールが未作成です。タスク作成用マイグレーションを実行してください。'
+          : code === '42501'
+            ? 'タスクを作成する権限がありません。RLS設定を確認してください。'
+            : message.includes('schema cache')
+              ? 'Supabaseのスキーマキャッシュが更新されていません。PostgRESTを再読み込みしてください。'
+              : `タスクの作成に失敗しました${code ? `（${code}）` : ''}。もう一度お試しください。`
+      );
+      throw error;
     }
   };
 

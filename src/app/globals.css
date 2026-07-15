@@ -3,6 +3,12 @@
 @import "shadcn/tailwind.css";
 @import "leaflet/dist/leaflet.css";
 
+/* 投稿画面のカスタム地図ピン。Leaflet既定の背景・枠を無効化する。 */
+.altago-location-pin {
+  background: transparent !important;
+  border: 0 !important;
+}
+
 /* ── Scroll-triggered animations ── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(28px); }

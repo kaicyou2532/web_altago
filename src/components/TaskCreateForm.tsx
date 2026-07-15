@@ -11,7 +11,7 @@ const TaskLocationPicker = dynamic(() => import('@/components/TaskLocationPicker
 });
 
 interface TaskCreateFormProps {
-  onTaskCreateAction: (task: CreateTaskInput) => void;
+  onTaskCreateAction: (task: CreateTaskInput) => Promise<void>;
 }
 
 export default function TaskCreateForm({ onTaskCreateAction }: TaskCreateFormProps) {
@@ -25,6 +25,7 @@ export default function TaskCreateForm({ onTaskCreateAction }: TaskCreateFormPro
   const [latitude, setLatitude] = useState(35.6812);
   const [longitude, setLongitude] = useState(139.7671);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -35,13 +36,19 @@ export default function TaskCreateForm({ onTaskCreateAction }: TaskCreateFormPro
     return e;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-    onTaskCreateAction({ title, location, description, reward: Number(reward), currency, tags, latitude, longitude });
-    setTitle(''); setLocation(''); setDescription(''); setReward('');
-    setErrors({});
+    setSubmitting(true);
+    try {
+      await onTaskCreateAction({ title, location, description, reward: Number(reward), currency, tags, latitude, longitude });
+      setTitle(''); setLocation(''); setDescription(''); setReward(''); setTags([]); setTagInput('');
+      setErrors({});
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   function addTag() {
@@ -136,10 +143,11 @@ export default function TaskCreateForm({ onTaskCreateAction }: TaskCreateFormPro
 
       <button
         type="submit"
-        className="w-full rounded-xl py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        disabled={submitting}
+        className="w-full rounded-xl py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         style={{ background: '#007B63' }}
       >
-        タスクを投稿する
+        {submitting ? '投稿中...' : 'タスクを投稿する'}
       </button>
     </form>
   );

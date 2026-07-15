@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
-import type { LatLngExpression } from 'leaflet';
+import { divIcon, type LatLngExpression } from 'leaflet';
 
 type Props = {
   latitude: number;
@@ -10,13 +10,43 @@ type Props = {
   onChangeAction: (latitude: number, longitude: number) => void;
 };
 
+// Leaflet標準アイコンはNext.js環境で画像URLを解決できないことがあるため、
+// public画像に依存しないHTMLアイコンを使用する。
+const locationPinIcon = divIcon({
+  className: 'altago-location-pin',
+  html: `
+    <span style="
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:32px;
+      height:32px;
+      border:3px solid #fff;
+      border-radius:50% 50% 50% 0;
+      background:#007B63;
+      box-shadow:0 4px 12px rgba(0,0,0,.28);
+      transform:rotate(-45deg);
+    ">
+      <span style="
+        display:block;
+        width:9px;
+        height:9px;
+        border-radius:50%;
+        background:#fff;
+      "></span>
+    </span>
+  `,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+});
+
 function ClickMarker({ onChangeAction, position }: { onChangeAction: Props['onChangeAction']; position: LatLngExpression }) {
   useMapEvents({
     click(event) {
       onChangeAction(event.latlng.lat, event.latlng.lng);
     },
   });
-  return <Marker position={position} />;
+  return <Marker position={position} icon={locationPinIcon} />;
 }
 
 export default function TaskLocationPicker({ latitude, longitude, onChangeAction }: Props) {
